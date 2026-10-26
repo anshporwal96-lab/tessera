@@ -1,0 +1,7 @@
+target/
+.local/
+.mvn/
+mvnw
+mvnw.cmd
+scripts/
+*.log

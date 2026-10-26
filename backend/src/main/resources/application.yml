@@ -1,0 +1,50 @@
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: never
+
+spring:
+  application:
+    name: tessera-backend
+  datasource:
+    # Local development defaults. In any shared or production environment set
+    # TESSERA_DB_URL / TESSERA_DB_USER / TESSERA_DB_PASSWORD instead.
+    url: ${TESSERA_DB_URL:jdbc:postgresql://localhost:5432/tessera}
+    username: ${TESSERA_DB_USER:tessera}
+    password: ${TESSERA_DB_PASSWORD:tessera_dev}
+  flyway:
+    locations: classpath:db/migration
+  jackson:
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+tessera:
+  cors-origins: ${TESSERA_CORS_ORIGINS:http://localhost:5173}
+  daily:
+    epoch: 2025-01-01
+    word-length: 5
+    max-guesses: 6
+    # Puzzles are assigned this many days ahead so a word-bank edit never changes a published day.
+    pregenerate-days: 7
+    # A word is not reused within this many days while unused alternatives exist.
+    recent-gap-days: 180
+  rate-limit:
+    enabled: true
+    # Buckets are forgotten after 10 idle minutes; above this many clients, idle ones are evicted early.
+    max-clients: 100000
+    # New anonymous players per IP: burst of 30 (a classroom on one NAT), then 1 per minute.
+    register:
+      capacity: 30
+      refill-per-minute: 1
+    # Guesses per IP: a fast player sends ~6 per puzzle; this only stops scripted guessing.
+    guess:
+      capacity: 30
+      refill-per-minute: 30
+    read:
+      capacity: 120
+      refill-per-minute: 120

@@ -1,0 +1,23 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.vite/
+coverage/
+
+# Docker Compose secrets (frontend/.env holds only public build settings and is committed)
+/.env
+# Personal overrides (Vite convention)
+.env.local
+.env.*.local
+
+# Editors and local tooling
+.idea/
+*.iml
+.vscode/
+.claude/
+
+# Backend
+backend/target/
+# Local-only secrets (generated DB superuser password etc.)
+backend/.local/

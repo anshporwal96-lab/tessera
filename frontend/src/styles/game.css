@@ -1,0 +1,562 @@
+/* ---------- Game layout ---------- */
+.game-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.game-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: min(500px, 100%);
+  margin: 0 auto;
+  padding: 10px 16px 0;
+  min-height: 46px;
+}
+
+.toolbar-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.game-toolbar .chip:only-child {
+  margin: 0 auto;
+}
+
+/* The board scales to whatever space is left between toolbar and keyboard. */
+.board-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+}
+
+/* --tile is measured in GameBoard so the grid always fits between toolbar and keyboard. */
+.board {
+  display: grid;
+  gap: var(--gap);
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--tile));
+  grid-auto-rows: var(--tile);
+  gap: var(--gap);
+}
+
+.board .tile {
+  font-size: calc(var(--tile) * 0.5);
+}
+
+/* ---------- Tiles ---------- */
+.tile {
+  --tile-bg: transparent;
+  --tile-border: var(--tile-empty-border);
+  --tile-color: var(--text);
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 2px solid var(--tile-border);
+  border-radius: 8px;
+  background: var(--tile-bg);
+  color: var(--tile-color);
+  font-weight: 800;
+  font-size: 1.6rem;
+  text-transform: uppercase;
+  user-select: none;
+  line-height: 1;
+}
+
+.tile-filled {
+  --tile-border: var(--tile-filled-border);
+}
+
+.tile-correct,
+.tile-present,
+.tile-absent,
+.tile-answer {
+  --tile-color: var(--tile-text);
+  border-color: transparent;
+}
+
+.tile-correct {
+  --tile-bg: var(--correct);
+}
+.tile-present {
+  --tile-bg: var(--present);
+}
+.tile-absent {
+  --tile-bg: var(--absent);
+}
+.tile-answer {
+  --tile-bg: var(--text);
+  --tile-color: var(--bg);
+}
+
+.tile-pop {
+  animation: pop 0.1s ease-out;
+}
+
+/* Flip: the tile shows its "typed" look until it is edge-on, then its colour. */
+.tile-reveal {
+  animation: flip 520ms ease-in-out both;
+  animation-delay: calc(var(--i) * 280ms);
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateX(0);
+    background: transparent;
+    border-color: var(--tile-filled-border);
+    color: var(--text);
+  }
+  49.9% {
+    transform: rotateX(-90deg);
+    background: transparent;
+    border-color: var(--tile-filled-border);
+    color: var(--text);
+  }
+  50% {
+    transform: rotateX(-90deg);
+  }
+  100% {
+    transform: rotateX(0);
+  }
+}
+
+@keyframes pop {
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.tile-bounce {
+  animation: bounce 0.8s ease both;
+  animation-delay: calc(var(--i) * 90ms);
+}
+
+@keyframes bounce {
+  0%,
+  20% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-30%);
+  }
+  50% {
+    transform: translateY(5%);
+  }
+  60% {
+    transform: translateY(-12%);
+  }
+  80% {
+    transform: translateY(2%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.row-shake {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-6px);
+  }
+  40%,
+  60% {
+    transform: translateX(6px);
+  }
+}
+
+.tile-small {
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
+  border-radius: 7px;
+}
+
+/* ---------- Keyboard ---------- */
+.keyboard {
+  width: min(500px, 100%);
+  margin: 0 auto;
+  padding: 0 8px max(12px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 6px;
+}
+
+.key-spacer {
+  flex: 0.5;
+}
+
+.key {
+  flex: 1;
+  height: 56px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--key-bg);
+  color: var(--key-text);
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s, transform 0.06s;
+}
+
+.key:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.key:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.key-wide {
+  flex: 1.55;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.key-correct,
+.key-present,
+.key-absent {
+  color: #fff;
+}
+.key-correct {
+  background: var(--correct);
+}
+.key-present {
+  background: var(--present);
+}
+.key-absent {
+  background: var(--absent);
+}
+
+@media (max-height: 700px) {
+  .key {
+    height: 48px;
+  }
+}
+
+@media (max-width: 360px) {
+  .keyboard-row {
+    gap: 4px;
+  }
+  .key {
+    font-size: 0.95rem;
+  }
+}
+
+/* ---------- Results ---------- */
+.result-hero {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.result-context {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.result-answer {
+  display: inline-flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.result-line {
+  color: var(--text-muted);
+}
+
+.section-title {
+  font-size: 0.8rem !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 18px 0 10px !important;
+}
+
+.stats-summary {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin: 0;
+}
+
+@media (max-width: 420px) {
+  .stats-summary {
+    gap: 4px;
+  }
+  .stat-value {
+    font-size: 1.25rem !important;
+  }
+  .stat-label {
+    font-size: 0.62rem !important;
+    line-height: 1.2;
+  }
+}
+
+.stat {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  text-align: center;
+  padding: 8px 2px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.stat-value {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dist-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.dist-index {
+  width: 12px;
+  text-align: center;
+}
+
+.dist-track {
+  flex: 1;
+}
+
+.dist-bar {
+  background: var(--absent);
+  color: #fff;
+  text-align: right;
+  padding: 1px 8px;
+  border-radius: 4px;
+  min-width: 26px;
+  font-variant-numeric: tabular-nums;
+  transition: width 0.4s ease-out;
+}
+
+.dist-bar-active {
+  background: var(--correct);
+}
+
+.community-line {
+  margin: 14px 0 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.result-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 20px 0 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.result-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.result-actions .button {
+  flex: 1;
+}
+
+.countdown {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.countdown-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.countdown-time {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown-zone {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.match-score {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.match-rounds {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.match-rounds li {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.match-rounds li span:last-child {
+  text-align: right;
+}
+
+.round-word {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.round-won .round-word {
+  color: var(--correct);
+}
+
+.round-lost .round-word {
+  color: var(--hard);
+}
+
+.page-error {
+  margin: 48px auto;
+  padding: 24px;
+  text-align: center;
+  max-width: 420px;
+}
+
+/* ---------- Rules ---------- */
+.example-row {
+  display: flex;
+  gap: 5px;
+  margin: 10px 0 6px;
+}
+
+.example-caption {
+  font-size: 0.92rem;
+}
+
+.rules-list {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.rules-list li {
+  margin-bottom: 8px;
+}
+
+.schedule {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.schedule-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.schedule-day .badge {
+  font-size: 0.6rem;
+  padding: 1px 4px;
+  white-space: nowrap;
+}
+
+@media (max-width: 440px) {
+  .schedule {
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: 10px;
+  }
+}

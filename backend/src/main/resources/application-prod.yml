@@ -1,0 +1,42 @@
+# Production profile: activate with SPRING_PROFILES_ACTIVE=prod.
+# Database settings have no defaults here — startup fails fast if any is missing.
+
+spring:
+  datasource:
+    url: ${TESSERA_DB_URL}
+    username: ${TESSERA_DB_USER}
+    password: ${TESSERA_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${TESSERA_DB_POOL_SIZE:10}
+      connection-timeout: 5000
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+server:
+  # Finish in-flight requests on SIGTERM (container stop / rolling deploy).
+  shutdown: graceful
+  # Trust X-Forwarded-For / X-Forwarded-Proto from the reverse proxy, so rate
+  # limiting sees real client IPs. The API port must ONLY be reachable through
+  # that proxy, and the proxy must overwrite (not append to) X-Forwarded-For.
+  forward-headers-strategy: framework
+  compression:
+    enabled: true
+    mime-types: application/json
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true # /actuator/health/liveness and /readiness for orchestrators
+
+tessera:
+  cors-origins: ${TESSERA_CORS_ORIGINS}
+
+logging:
+  level:
+    root: INFO
+    org.flywaydb: INFO

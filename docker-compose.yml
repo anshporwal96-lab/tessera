@@ -1,0 +1,46 @@
+# Full stack: PostgreSQL + Spring Boot API + nginx serving the frontend.
+#   cp .env.example .env   # then set TESSERA_DB_PASSWORD
+#   docker compose up --build
+# Open http://localhost:8000 (or TESSERA_HTTP_PORT). Only the web container is published;
+# the API and database are reachable only on the internal network.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tessera
+      POSTGRES_USER: tessera
+      POSTGRES_PASSWORD: ${TESSERA_DB_PASSWORD:?Set TESSERA_DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tessera -d tessera"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      TESSERA_DB_URL: jdbc:postgresql://db:5432/tessera
+      TESSERA_DB_USER: tessera
+      TESSERA_DB_PASSWORD: ${TESSERA_DB_PASSWORD:?Set TESSERA_DB_PASSWORD in .env}
+      TESSERA_CORS_ORIGINS: ${TESSERA_PUBLIC_ORIGIN:-http://localhost:8000}
+    depends_on:
+      db:
+        condition: service_healthy
+    stop_grace_period: 30s
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "${TESSERA_HTTP_PORT:-8000}:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
